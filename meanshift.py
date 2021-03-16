@@ -17,7 +17,7 @@ cv2.normalize(hist, hist, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 frame_counter = 0
 start_frame = 114
 track_window = [592, 180, template.shape[1], template.shape[0]]
-#track_window = [552, 180, 80, 60]
+
 # Setup the termination criteria, either 10 iteration or move by atleast 1 pt
 termination_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.7)
 our_termination_crit = 10
@@ -48,7 +48,7 @@ while True:
 
         # Draw it on image
         x, y, w, h = track_window
-        img2 = cv2.rectangle(backproj, (x, y), (x + w, y + h), 255, 2)
+        img2 = cv2.rectangle(frame, (x, y), (x + w, y + h), 255, 2)
         cv2.imshow('img2', img2)
 
         k = cv2.waitKey(30) & 0xff

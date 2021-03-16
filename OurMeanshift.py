@@ -7,8 +7,6 @@ def our_meanShift(inProj, window, criteria):
 
     cur_rect = window
 
-    print(cur_rect)
-
     # Check if legitimate window
     if window[3] <= 0 or window[2] <= 0:
         print("Input window has non-positive sizes")
@@ -18,7 +16,7 @@ def our_meanShift(inProj, window, criteria):
 
     # Establish max iterations and stopping criteria
     niters = criteria
-    stop = 50
+    stop = 1
 
     for i in range(0, niters):
 
@@ -37,11 +35,23 @@ def our_meanShift(inProj, window, criteria):
         yMass = 0
         totalMass = 0
 
+        kernelsize = (cur_rect[3], cur_rect[2])
+        testArray = np.zeros(kernelsize)
+        yt = 0
+        xt = 0
+
+        testArrayCoords = np.zeros(kernelsize)
+
         for y in range(int(cur_rect[1]), yEnd):
+            xt = 0
             for x in range(int(cur_rect[0]), xEnd):
                 yMass += inProj[y][x] * y
                 xMass += inProj[y][x] * x
                 totalMass += inProj[y][x]
+                testArray[yt][xt] = inProj[y][x]
+                testArrayCoords[yt][xt] = int(str(y) + str(x))
+                xt += 1
+            yt += 1
 
         if totalMass < 1:
             print("No Matching pixels found")
@@ -49,15 +59,24 @@ def our_meanShift(inProj, window, criteria):
         centerOfMassY = yMass / totalMass
         centerOfMassX = xMass / totalMass
 
-        print(centerOfMassX)
-        print(centerOfMassY)
         nx = np.minimum(np.maximum(centerOfMassX, 0), inProj.shape[1] - cur_rect[2])
         ny = np.minimum(np.maximum(centerOfMassY, 0), inProj.shape[0] - cur_rect[3])
 
+        nx = nx - cur_rect[2]/2
+        ny = ny - cur_rect[3]/2
+
+        #print("TestArray:")
+        #print(testArray)
+
+        #print("TestArrayCoords:")
+        #print(testArrayCoords)
+
         dx = nx - cur_rect[0]
         dy = ny - cur_rect[1]
-        cur_rect[0] = int(nx)
-        cur_rect[1] = int(ny)
+
+
+        cur_rect[0] = round(nx)
+        cur_rect[1] = round(ny)
 
         # Did we move a significant amount?
         if dx * dx + dy * dy < stop:
