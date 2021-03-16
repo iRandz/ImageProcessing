@@ -15,8 +15,8 @@ def our_meanShift(inProj, window, criteria):
     # window = window & Rect(0, 0, size.width, size.height)
 
     # Establish max iterations and stopping criteria
-    niters = criteria
-    stop = 1
+    niters = 1000
+    stop = criteria
 
     for i in range(0, niters):
 

@@ -20,7 +20,7 @@ track_window = [592, 180, template.shape[1], template.shape[0]]
 
 # Setup the termination criteria, either 10 iteration or move by atleast 1 pt
 termination_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.7)
-our_termination_crit = 10
+our_termination_crit = 1
 innerRet=True
 while True:
     ret, frame = cap.read()
