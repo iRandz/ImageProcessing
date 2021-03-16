@@ -1,64 +1,67 @@
 import numpy as np
 import cv2
 
-def our_meanShift(_probImage, window, criteria ):
-    #CV_INSTRUMENT_REGION()
 
-    #size
-    #cn
-    #mat
-    #umat
-    isUMat = _probImage.isUMat()
-
-    if (isUMat):
-        umat = _probImage.getUMat(), cn = umat.channels(), size = umat.size()
-    else:
-        mat = _probImage.getMat(), cn = mat.channels(), size = mat.size()
+def our_meanShift(inProj, window, criteria):
+    # Get variables
 
     cur_rect = window
 
-    CV_Assert( cn == 1 )
+    print(cur_rect)
 
-    if window.height <= 0 or window.width <= 0:
-        print("Input window has non-positive sizes" )
+    # Check if legitimate window
+    if window[3] <= 0 or window[2] <= 0:
+        print("Input window has non-positive sizes")
 
-    window = window & Rect(0, 0, size.width, size.height)
+    # establish window with values from backprojection
+    # window = window & Rect(0, 0, size.width, size.height)
 
-    eps = (criteria.type & TermCriteria::EPS) ? std::max(criteria.epsilon, 0.) : 1.;
-    eps = cvRound(eps*eps);
-    int i, niters = (criteria.type & TermCriteria::MAX_ITER) ? std::max(criteria.maxCount, 1) : 100;
+    # Establish max iterations and stopping criteria
+    niters = criteria
+    stop = 50
 
-    for( i = 0; i < niters; i++ ):
-        cur_rect = cur_rect & Rect(0, 0, size.width, size.height);
-        if( cur_rect == Rect() )
-        {
-            cur_rect.x = size.width/2;
-            cur_rect.y = size.height/2;
-        }
-        cur_rect.width = std::max(cur_rect.width, 1);
-        cur_rect.height = std::max(cur_rect.height, 1);
+    for i in range(0, niters):
 
-        Moments m = isUMat ? moments(umat(cur_rect)) : moments(mat(cur_rect));
+        # If no window make new one
+        if cur_rect is 0:
+            cur_rect[1] = inProj.size.width / 2
+            cur_rect[0] = inProj.size.height / 2
 
-        # Calculating center of mass
-        if( fabs(m.m00) < DBL_EPSILON )
-            break;
+        cur_rect[1] = np.maximum(cur_rect[1], 1)
+        cur_rect[0] = np.maximum(cur_rect[0], 1)
 
-        int dx = cvRound( m.m10/m.m00 - window.width*0.5 );
-        int dy = cvRound( m.m01/m.m00 - window.height*0.5 );
+        # calculate center of mass
+        xEnd = int(cur_rect[0] + cur_rect[2])
+        yEnd = int(cur_rect[1] + cur_rect[3])
+        xMass = 0
+        yMass = 0
+        totalMass = 0
 
-        int nx = std::min(std::max(cur_rect.x + dx, 0), size.width - cur_rect.width);
-        int ny = std::min(std::max(cur_rect.y + dy, 0), size.height - cur_rect.height);
+        for y in range(int(cur_rect[1]), yEnd):
+            for x in range(int(cur_rect[0]), xEnd):
+                yMass += inProj[y][x] * y
+                xMass += inProj[y][x] * x
+                totalMass += inProj[y][x]
 
-        dx = nx - cur_rect.x;
-        dy = ny - cur_rect.y;
-        cur_rect.x = nx;
-        cur_rect.y = ny;
+        if totalMass < 1:
+            print("No Matching pixels found")
+            break
+        centerOfMassY = yMass / totalMass
+        centerOfMassX = xMass / totalMass
 
-        # Check for coverage centers mass & window
-        if( dx*dx + dy*dy < eps )
-            break;
-    }
+        print(centerOfMassX)
+        print(centerOfMassY)
+        nx = np.minimum(np.maximum(centerOfMassX, 0), inProj.shape[1] - cur_rect[2])
+        ny = np.minimum(np.maximum(centerOfMassY, 0), inProj.shape[0] - cur_rect[3])
 
-    window = cur_rect;
-    return i;
+        dx = nx - cur_rect[0]
+        dy = ny - cur_rect[1]
+        cur_rect[0] = int(nx)
+        cur_rect[1] = int(ny)
+
+        # Did we move a significant amount?
+        if dx * dx + dy * dy < stop:
+            break
+
+    window = cur_rect
+    return window
