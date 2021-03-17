@@ -6,6 +6,8 @@ def our_meanShift(inProj, window, criteria):
     # Get variables
 
     cur_rect = window
+    outputCenterOfMassY = 0
+    outputCenterOfMassX = 0
 
     # Check if legitimate window
     if window[3] <= 0 or window[2] <= 0:
@@ -35,23 +37,12 @@ def our_meanShift(inProj, window, criteria):
         yMass = 0
         totalMass = 0
 
-        kernelsize = (cur_rect[3], cur_rect[2])
-        testArray = np.zeros(kernelsize)
-        yt = 0
-        xt = 0
-
-        testArrayCoords = np.zeros(kernelsize)
-
         for y in range(int(cur_rect[1]), yEnd):
             xt = 0
             for x in range(int(cur_rect[0]), xEnd):
                 yMass += inProj[y][x] * y
                 xMass += inProj[y][x] * x
                 totalMass += inProj[y][x]
-                testArray[yt][xt] = inProj[y][x]
-                testArrayCoords[yt][xt] = int(str(y) + str(x))
-                xt += 1
-            yt += 1
 
         if totalMass < 1:
             print("No Matching pixels found")
@@ -62,25 +53,27 @@ def our_meanShift(inProj, window, criteria):
         nx = np.minimum(np.maximum(centerOfMassX, 0), inProj.shape[1] - cur_rect[2])
         ny = np.minimum(np.maximum(centerOfMassY, 0), inProj.shape[0] - cur_rect[3])
 
+        outputCenterOfMassX = nx
+        outputCenterOfMassY = ny
+
         nx = nx - cur_rect[2]/2
         ny = ny - cur_rect[3]/2
 
-        #print("TestArray:")
-        #print(testArray)
-
-        #print("TestArrayCoords:")
-        #print(testArrayCoords)
-
         dx = nx - cur_rect[0]
         dy = ny - cur_rect[1]
-
 
         cur_rect[0] = round(nx)
         cur_rect[1] = round(ny)
 
         # Did we move a significant amount?
         if dx * dx + dy * dy < stop:
+            print("Iterations: ", i)
             break
 
+    # Draw it on image
+    x, y, w, h = cur_rect
+    imgInner = cv2.rectangle(np.copy(inProj), (x, y), (x + w, y + h), 255, 2)
+    cv2.imshow('imgInner', imgInner)
+
     window = cur_rect
-    return window
+    return window, outputCenterOfMassY, outputCenterOfMassX
