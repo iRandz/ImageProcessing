@@ -10,19 +10,19 @@ template_hsv = cv2.cvtColor(template, cv2.COLOR_BGR2HSV)
 ranges = [0, 180, 0, 256]
 mask = cv2.inRange(template_hsv, np.array((0.0, 50.0, 30.0)), np.array((180.0, 255.0, 255.0)))
 
-hist = cv2.calcHist([template_hsv], [0,1], mask, [180, 256], ranges)
+hist = cv2.calcHist([template_hsv], [0, 1], mask, [180, 256], ranges)
 cv2.normalize(hist, hist, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
 # Video scrubbing parameters
 frame_counter = 0
 start_frame = 114
 track_window = [592, 180, template.shape[1], template.shape[0]]
-#track_window = [592, 180, 10, 10]
+# track_window = [592, 180, 10, 10]
 
 # Setup the termination criteria, either 10 iteration or move by atleast 1 pt
 termination_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.7)
 our_termination_crit = 1
-innerRet=True
+innerRet = True
 while True:
     ret, frame = cap.read()
     if ret and innerRet:
@@ -39,22 +39,26 @@ while True:
         cv2.imshow('img1', backproj)
 
         # Morphology
-        #kernel = np.ones((2, 2), np.uint8)
-        #backproj = cv2.morphologyEx(backproj, cv2.MORPH_OPEN, kernel)
-        kernel = np.ones((10, 10), np.uint8)
-        backproj = cv2.morphologyEx(backproj, cv2.MORPH_CLOSE, kernel)
+        # kernel = np.ones((2, 2), np.uint8)
+        # backproj = cv2.morphologyEx(backproj, cv2.MORPH_OPEN, kernel)
+        # kernel = np.ones((10, 10), np.uint8)
+        # backproj = cv2.morphologyEx(backproj, cv2.MORPH_CLOSE, kernel)
 
+        backproj = cv2.GaussianBlur(backproj, (template.shape[1] - 1, template.shape[0] - 1), 0)
 
+        cv2.imshow('blur', backproj)
 
-        #innerRet, track_window = cv2.meanShift(backproj, track_window, termination_crit)
+        # innerRet, track_window = cv2.meanShift(backproj, track_window, termination_crit)
         track_window, yC, xC = OurMeanshift.our_meanShift(backproj, track_window, our_termination_crit)
 
+
+
+        # Draw it on image
         yC = round(yC)
         xC = round(xC)
-        # Draw it on image
         x, y, w, h = track_window
-        img2 = cv2.rectangle(frame, (x, y), (x + w, y + h), 255, 2)
-        img2 = cv2.rectangle(img2, (xC, yC), (xC + 1, yC + 1), 255, 2)
+        img2 = cv2.rectangle(frame, (x, y), (x + w, y + h), 255, 2)  # Box
+        img2 = cv2.rectangle(img2, (xC, yC), (xC + 1, yC + 1), 255, 2)  # Center of mass
         cv2.imshow('img2', img2)
 
         k = cv2.waitKey(30) & 0xff
