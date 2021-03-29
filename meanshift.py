@@ -13,6 +13,8 @@ mask = cv2.inRange(template_hsv, np.array((0.0, 50.0, 30.0)), np.array((180.0, 2
 hist = cv2.calcHist([template_hsv], [0, 1], mask, [180, 256], ranges)
 cv2.normalize(hist, hist, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
+cv2.imshow('hist', hist)
+
 # Video scrubbing parameters
 frame_counter = 0
 start_frame = 114
@@ -36,17 +38,12 @@ while True:
         backproj = cv2.calcBackProject([frame_hsv], [0, 1], hist, ranges, 1)
         cv2.normalize(backproj, backproj, 0, 255, cv2.NORM_MINMAX)
 
-        cv2.imshow('img1', backproj)
+        cv2.imshow('BackProjection', backproj)
 
-        # Morphology
-        # kernel = np.ones((2, 2), np.uint8)
-        # backproj = cv2.morphologyEx(backproj, cv2.MORPH_OPEN, kernel)
-        # kernel = np.ones((10, 10), np.uint8)
-        # backproj = cv2.morphologyEx(backproj, cv2.MORPH_CLOSE, kernel)
+        #backproj = cv2.GaussianBlur(backproj, (template.shape[1] - 1, template.shape[0] - 1), 0)
+        backproj = cv2.GaussianBlur(backproj, (11, 11), 0)
 
-        backproj = cv2.GaussianBlur(backproj, (template.shape[1] - 1, template.shape[0] - 1), 0)
-
-        cv2.imshow('blur', backproj)
+        cv2.imshow('BlurredBackProjection', backproj)
 
         # innerRet, track_window = cv2.meanShift(backproj, track_window, termination_crit)
         track_window, yC, xC = OurMeanshift.our_meanShift(backproj, track_window, our_termination_crit)

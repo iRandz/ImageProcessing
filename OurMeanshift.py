@@ -38,7 +38,6 @@ def our_meanShift(inProj, window, criteria):
         totalMass = 0
 
         for y in range(int(cur_rect[1]), yEnd):
-            xt = 0
             for x in range(int(cur_rect[0]), xEnd):
                 yMass += inProj[y][x] * y
                 xMass += inProj[y][x] * x
@@ -72,7 +71,10 @@ def our_meanShift(inProj, window, criteria):
 
     # Draw it on image
     x, y, w, h = cur_rect
+    newY = round(outputCenterOfMassY)
+    newX = round(outputCenterOfMassX)
     imgInner = cv2.rectangle(np.copy(inProj), (x, y), (x + w, y + h), 255, 2)
+    imgInner = cv2.rectangle(imgInner, (newX, newY), (newX+1, newY+1), 255, 2)
     cv2.imshow('imgInner', imgInner)
 
     window = cur_rect
