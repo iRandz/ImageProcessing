@@ -21,6 +21,9 @@ start_frame = 114
 track_window = [592, 180, template.shape[1], template.shape[0]]
 # track_window = [592, 180, 10, 10]
 
+# Prepare the output file
+out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10, (int(cap.get(3)), int(cap.get(4))))
+
 # Setup the termination criteria, either 10 iteration or move by atleast 1 pt
 termination_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.7)
 our_termination_crit = 1
@@ -57,6 +60,8 @@ while True:
         img2 = cv2.rectangle(frame, (x, y), (x + w, y + h), 255, 2)  # Box
         img2 = cv2.rectangle(img2, (xC, yC), (xC + 1, yC + 1), 255, 2)  # Center of mass
         cv2.imshow('img2', img2)
+
+        out.write(img2)
 
         k = cv2.waitKey(30) & 0xff
         if k == 27:
