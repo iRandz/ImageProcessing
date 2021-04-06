@@ -24,7 +24,7 @@ track_window = [592, 180, template.shape[1], template.shape[0]]
 # Prepare the output file
 out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10, (int(cap.get(3)), int(cap.get(4))))
 
-# Setup the termination criteria, either 10 iteration or move by atleast 1 pt
+# Setup the termination criteria, either 10 iteration or move by at least 1 pt
 termination_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.7)
 our_termination_crit = 1
 innerRet = True
@@ -43,15 +43,13 @@ while True:
 
         cv2.imshow('BackProjection', backproj)
 
-        #backproj = cv2.GaussianBlur(backproj, (template.shape[1] - 1, template.shape[0] - 1), 0)
+        # backproj = cv2.GaussianBlur(backproj, (template.shape[1] - 1, template.shape[0] - 1), 0)
         backproj = cv2.GaussianBlur(backproj, (11, 11), 0)
 
         cv2.imshow('BlurredBackProjection', backproj)
 
         # innerRet, track_window = cv2.meanShift(backproj, track_window, termination_crit)
         track_window, yC, xC = OurMeanshift.our_meanShift(backproj, track_window, our_termination_crit)
-
-
 
         # Draw it on image
         yC = round(yC)
